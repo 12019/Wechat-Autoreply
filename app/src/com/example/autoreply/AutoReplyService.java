@@ -26,7 +26,7 @@ import android.widget.Toast;
 @SuppressWarnings("deprecation")
 public class AutoReplyService extends AccessibilityService {  
 	
-	private boolean canGet = false;//能否回复
+	private boolean canReply = false;//能否回复且每次收到消息只回复一次
 	private boolean enableKeyguard = true;//默认有屏幕锁
 	private int mode = 1;//微信通知模式：1.详细通知2.非详细通知
 	private AccessibilityNodeInfo editText = null;
@@ -125,6 +125,12 @@ public class AutoReplyService extends AccessibilityService {
             List<CharSequence> texts = event.getText();
             if (!texts.isEmpty()) {
             	String message = texts.get(0).toString();
+            	
+            	//过滤微信内部通知消息
+            	if(isInside(message)) {
+            		return;
+            	}
+            	
             	StaticData.total++;
             	setData(message);
             	
@@ -136,19 +142,24 @@ public class AutoReplyService extends AccessibilityService {
             	if(!StaticData.auto)
             		return;
             	
+            	//微信的两种通知消息类型，mode=1为详细内容，mode=2为通用类型
             	if(message.equals("微信：你收到了一条消息。"))
             		mode = 2;
             	else
             		mode = 1;
             	
-            	//判断是否指定好友并过滤
-            	if(StaticData.isfriend && (mode == 1) && ( !message.contains(StaticData.friend) )) {
-        			return;
+            	
+            	//判断是否指定好友并进行过滤
+            	if(StaticData.isfriend && (mode == 1) && ( !message.split(":")[0].equals(StaticData.friend) )) {
+            		Log.i("demo", "不匹配"); 
+            		return;
             	}
+            	
+            	
                 //模拟打开通知栏消息  
                 if (event.getParcelableData() != null && event.getParcelableData() instanceof Notification) {
-                	Log.i("demo", "标题栏Get=true");
-                	canGet = true;
+                	Log.i("demo", "标题栏canReply=true");
+                	canReply = true;
                 	wakeAndUnlock(true);
                 	try {
                 		Notification notification = (Notification) event.getParcelableData();  
@@ -163,8 +174,8 @@ public class AutoReplyService extends AccessibilityService {
 
         //第二步：监听是否进入微信聊天界面    
         case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
-	    	if(canGet) {
-	        	canGet = false;
+	    	if(canReply) {
+	    		canReply = false;
 	        	reply();
 	        	performBack(this);
 	        }
@@ -172,7 +183,16 @@ public class AutoReplyService extends AccessibilityService {
         }
     }   
  
-
+    //常见的微信内部通知，可自行测试并修改
+    private boolean isInside(String msg) {
+    	boolean result = false;
+    	if(msg.equals("已复制") || msg.equals("已分享"))
+    		result = true;
+    	if(msg.length() > 6 && (msg.substring(0, 6).equals("当前处于移动") || msg.substring(0, 6).equals("无法连接到服") || msg.substring(0, 6).equals("图片已保存至")))
+    		result = true;
+    	return result;
+    }
+    
     @SuppressWarnings("static-access")
 	private void setData(String data) {
     	Time time = new Time(); 
@@ -339,7 +359,7 @@ public class AutoReplyService extends AccessibilityService {
 	        	startActivity(lockscreen);
     	    } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
     	    	Log.i("demo", "screen on");
-    	    	if(canGet)
+    	    	if(canReply)
     	    		return;
     	        Intent lockscreen = new Intent(AutoReplyService.this, LockScreenActivity.class);
 	        	lockscreen.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

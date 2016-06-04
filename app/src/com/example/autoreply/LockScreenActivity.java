@@ -44,6 +44,7 @@ public class LockScreenActivity extends Activity {
             Levelbtn.setText((batteryLevel*100/batteryScale)+"%");
         }
     };
+
 	//30秒更新一次锁屏时间信息
 	private final Handler handler = new Handler();
     private final Runnable runnable = new Runnable() {

@@ -32,7 +32,7 @@ public class MainSetting extends Activity {
 	private Button aboutbtn;
 	private Button setbtn;
 	private CheckBox autobox;
-	private CheckBox allbox;
+	private CheckBox notallbox;
 	private LinearLayout linearlayout3;
 	//系统版本是否支持自动回复，需Android4.3以上才能直接通过组件id搜索
 	private boolean canAuto;
@@ -49,19 +49,22 @@ public class MainSetting extends Activity {
 	    	canAuto = false;
 	    
 	    autobox = (CheckBox) this.findViewById(R.id.autocheck);
-	    allbox = (CheckBox) this.findViewById(R.id.allcheck);
+	    notallbox = (CheckBox) this.findViewById(R.id.allcheck);
 	    editmsg = (EditText) this.findViewById(R.id.editmsg);
 	    editfriend = (EditText) this.findViewById(R.id.editfriend);
 	    startbtn = (Button) this.findViewById(R.id.startbtn);
 	    aboutbtn = (Button) this.findViewById(R.id.aboutbtn);
 	    setbtn = (Button) this.findViewById(R.id.setbtn);
 	    linearlayout3 = (LinearLayout) this.findViewById(R.id.linearLayout3);
-	    
+
 	    //设置默认信息
 	    editmsg.setText(StaticData.message);
 	    editfriend.setText(StaticData.friend);
-	    linearlayout3.setVisibility(View.GONE);
-	    
+	    if(!StaticData.auto)
+	    	linearlayout3.setVisibility(View.GONE);
+	    autobox.setChecked(StaticData.auto);
+	    notallbox.setChecked(!StaticData.showall);
+
 	    //判断并显示辅助服务是否开启
 	    this.showInfo();
 	    
@@ -85,7 +88,7 @@ public class MainSetting extends Activity {
 	    	
 	    });
 	    
-	    allbox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+	    notallbox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton cb, boolean b) {
 				if(b) {
