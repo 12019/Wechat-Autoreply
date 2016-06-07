@@ -186,9 +186,9 @@ public class AutoReplyService extends AccessibilityService {
     //常见的微信内部通知，可自行测试并修改
     private boolean isInside(String msg) {
     	boolean result = false;
-    	if(msg.equals("已复制") || msg.equals("已分享"))
+    	if(msg.equals("已复制") || msg.equals("已分享") || msg.equals("已下载"))
     		result = true;
-    	if(msg.length() > 6 && (msg.substring(0, 6).equals("当前处于移动") || msg.substring(0, 6).equals("无法连接到服") || msg.substring(0, 6).equals("图片已保存至")))
+    	if(msg.length() > 6 && (msg.substring(0, 6).equals("当前处于移动") || msg.substring(0, 6).equals("无法连接到服") || msg.substring(0, 6).equals("图片已保存至") || msg.substring(0, 6).equals("网络连接不可")))
     		result = true;
     	return result;
     }
